@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EnemySpawner : MonoBehaviour {
+public class FormationController : MonoBehaviour {
 
 	public GameObject enemyPrefab;
 	public float speed = 5.0f;
 	public float width = 10f;
 	public float height = 5f;
 	public float padding = 5f;
+	public float spawnDelay = 0.5f;
 	
 	private float xmin = -5f;
 	private float xmax = 5f;
@@ -22,11 +23,7 @@ public class EnemySpawner : MonoBehaviour {
 		xmin = leftMostPosition.x + padding;
 		xmax = rightMostPosition.x - padding;
 		
-		
-		foreach(Transform child in transform){
-			GameObject enemy = Instantiate(enemyPrefab, child.transform.position, Quaternion.identity) as GameObject;
-			enemy.transform.parent = child;
-		}
+		SpawnUntilFull();
 	}
 	
 	public void OnDrawGizmos(){
@@ -45,5 +42,46 @@ public class EnemySpawner : MonoBehaviour {
 		}
 		float newX = Mathf.Clamp(transform.position.x, xmin, xmax);
 		transform.position = new Vector3(newX, transform.position.y, transform.position.z);
+		
+		if(AllMembersDead()){
+			SpawnUntilFull();
+		}
 	}
+	
+	Transform NextFreePosition(){
+		foreach(Transform childPositionGameObject in transform){
+			if(childPositionGameObject.childCount == 0){
+				return childPositionGameObject;
+			}
+		}
+		return null;
+	}
+	
+	bool AllMembersDead(){
+		foreach(Transform childPositionGameObject in transform){
+			if(childPositionGameObject.childCount > 0){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	void SpawnEnemies(){
+		foreach(Transform child in transform){
+			GameObject enemy = Instantiate(enemyPrefab, child.transform.position, Quaternion.identity) as GameObject;
+			enemy.transform.parent = child;
+		}
+	}
+	
+	void SpawnUntilFull(){
+		Transform freePosition = NextFreePosition();
+		if(freePosition){
+			GameObject enemy = Instantiate(enemyPrefab, freePosition.position, Quaternion.identity) as GameObject;
+			enemy.transform.parent = freePosition;
+		}
+		if(NextFreePosition()){
+			Invoke("SpawnUntilFull", spawnDelay);
+		}	
+	}
+	
 }
