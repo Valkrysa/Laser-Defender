@@ -3,12 +3,14 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour {
 
+	public AudioClip explosion;
 	public float speed = 15.0f;
 	public float padding = 0.01f;
 	public GameObject projectile;
 	public float projectileSpeed;
 	public float firingRate = 0.2f;
 	public float health = 250f;
+	//public ScoreKeeper scoreKeeper;
 	
 	private float xmin = -5f;
 	private float xmax = 5f;
@@ -21,6 +23,8 @@ public class PlayerController : MonoBehaviour {
 		
 		xmin = leftMostPosition.x + padding;
 		xmax = rightMostPosition.x - padding;
+		
+		//scoreKeeper = GameObject.Find ("Score").GetComponent<ScoreKeeper>();
 	}
 	
 	void Fire(){
@@ -54,6 +58,8 @@ public class PlayerController : MonoBehaviour {
 			health -= missile.GetDamage();
 			missile.Hit();
 			if(health <= 0){
+				AudioSource.PlayClipAtPoint(explosion, transform.position, 10f);
+				//scoreKeeper.Reset();
 				Destroy(gameObject);
 			}
 		}

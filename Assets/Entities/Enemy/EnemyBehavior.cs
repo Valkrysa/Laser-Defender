@@ -3,10 +3,17 @@ using System.Collections;
 
 public class EnemyBehavior : MonoBehaviour {
 
+	public AudioClip explosion;
 	public float health = 150f;
 	public GameObject projectile;
 	public float projectileSpeed;
 	public float shotsPerSecond = 0.5f;
+	public ScoreKeeper scoreKeeper;
+	public int scoreValue = 150;
+	
+	void Start(){
+		scoreKeeper = GameObject.Find ("Score").GetComponent<ScoreKeeper>();
+	}
 	
 	void Update () {
 		float probability = Time.deltaTime * shotsPerSecond;
@@ -27,8 +34,15 @@ public class EnemyBehavior : MonoBehaviour {
 			health -= missile.GetDamage();
 			missile.Hit();
 			if(health <= 0){
-				Destroy(gameObject);
+				Die();
 			}
 		}
 	}
+	
+	void Die(){
+		AudioSource.PlayClipAtPoint(explosion, transform.position, 10f);
+		scoreKeeper.Score(scoreValue);
+		Destroy(gameObject);
+	}
+	
 }
